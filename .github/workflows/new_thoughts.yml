@@ -1,0 +1,82 @@
+name: pushing to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch: 
+
+    inputs:
+      # defines wha tlevel of logs are needed when manually running the flow 
+      logLevel:
+        description: 'log level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+        - info
+        - warning
+        - debug
+      # definnes the OS to run the job onn
+      chosen-os:
+        required: true
+        type: choice
+        options:
+          - ubuntu-latest
+          - ubuntu-20.04
+          - self-hosted
+
+jobs:
+
+  lint-test-build:
+    runs-on: "${{ inputs.chosen-os || 'ubuntu-latest'}}"
+
+    # allows you to run mutiple versions of python to test it on
+    strategy:
+      matrix:
+        python-version: [3.11] 
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v6
+        
+      - name: start stack
+        run: docker compose up -d
+
+      - name: wait for db
+        run: docker compose exec -T mysql \ sh -c 'mysql -h 127.0.0.1 -u root -pPassword -e "SELECT 1;" planes'
+
+      - name: run tests
+        run: docker compose exec -T app \pytest
+
+      - name: configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID_ROOT }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ROOT }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: build image
+        env: 
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry}}
+          ECR_REPOSITORY: project_plane_repo
+          IMAGE_TAG: be_${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./backend
+      
+      - name: Tag image as latest and push
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: project_plane_repo
+          IMAGE_TAG: be_devops_${{ github.sha }}
+        run: |
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+
+ 
