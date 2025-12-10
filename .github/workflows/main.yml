@@ -1,0 +1,44 @@
+name: pushing to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+
+    # sets up poython to runn tests
+    - name: set up Pyhton
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: install python vitrual enviromnet
+      run: pip install virtualenv
+    
+    - name: virtualenv
+      uses: actions/cache@v3
+      id: cache-venv
+      with: 
+        path: venv
+        key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-venv-
+    
+    - name: activate virtual environment
+      run: python -m venv venv && source venv/bin/activate && pip3 install -r requirements.txt
+
+    # actuall runs tests
+    - name: run tests
+      run: . venv/bin/activate && pytest
+
+
+    # I'm dockerisng rather than zipping in tutorial he zips, I'm better
+    - name: dockerize backend
+      run: docker build . --file backend/Dockerfile --tag project_plane_backend:$(date +%s)
+
+    - name: dockerize frontend
+      run: docker build . --file frontend/Dockerfile --tag project_plane_frontend:$(date +%s)
