@@ -31,6 +31,21 @@ jobs:
 
   lint-test-build:
     runs-on: "${{ inputs.chosen-os || 'ubuntu-latest'}}"
+
+    services:
+      mysql: 
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: Password
+          MYSQL_DATABASE: planes
+        ports: 
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -pPassword"
+          --health-intervals=10s
+          --health-timeout=5s
+          --health-retries=3 
+
     # allows you to run mutiple versions of python to test it on
     strategy:
       matrix:
@@ -62,6 +77,19 @@ jobs:
       - name: lint with flakes
         run: |
           . venv/bin/activate && flake8 backend/
+
+      - name: wait for SQL
+        run: |
+          sudo apt-get update && sudo apt-get install -y mysql-client
+          for i in {1..10}; do 
+              if mysql -h 127.0.0.1 -P 3306 -u root -pPassword -e "SELECT 1;" &> /dev/null; then
+                echo "mysql is ready"
+                break
+              fi
+              echo "waiting for mysql"
+              sleep 5
+          done
+
       
         # actuall runs tests
       - name: run tests
