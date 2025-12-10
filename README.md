@@ -32,4 +32,3 @@ To do list and to figure out breakdown:
     1. post to repo
     2. then do docker compose in repo 
     3. find out how to ping adddress to web 
-    

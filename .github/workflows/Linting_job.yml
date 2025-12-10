@@ -1,0 +1,51 @@
+name: linting_all_python_files
+
+on:
+    workflow_dispatch: 
+
+jobs: 
+    lint-all-py:
+        runs-on: ubuntu-latest
+
+        # allows you to run mutiple versions of python to test it on
+        strategy:
+            matrix:
+                python-version: [3.11] 
+
+        steps:
+            - name: checkout code 
+              uses: actions/checkout@v6
+
+            - name: set up python
+              uses: actions/setup-python@v4
+              with: 
+                python-version: ${{ matrix.python-verion }}
+
+            - name: install python vitrual enviromnet
+              run: pip install virtualenv
+            
+            - name: virtualenv
+              uses: actions/cache@v3
+              id: cache-venv
+              with: 
+                path: venv
+                key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements.txt') }}
+                restore-keys: |
+                    ${{ runner.os }}-venv-
+            
+            - name: activate virtual environment
+              run: python -m venv venv && source venv/bin/activate && python -m pip install --upgrade pip && pip install flake8 && pip3 install -r requirements.txt
+
+            - name: lint with flakes backend
+              run: |
+                . venv/bin/activate && flake8 backend/
+            
+            - name: lint with flakes frontend
+              run: |
+                . venv/bin/activate && flake8 frontend/
+            
+            - name: lint with flakes testing
+              run: |
+                . venv/bin/activate && flake8 testing/
+    
+                        

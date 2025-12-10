@@ -7,7 +7,7 @@ def data_processing():
     return Data_processing()
 
 def test_get_column_types():
-    assert Data_processing.get_column_types() == dict
+    assert Data_processing.get_column_types() == {flight: str}
 
 def test_check_data():
     assert Data_processing.check_data(df) == df
