@@ -5,6 +5,7 @@ import models
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
 import uvicorn
+from mangum import Mangum
 
 app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
@@ -68,8 +69,10 @@ async def create_post(post: PostBase, db: db_dep):
     db.add(db_post)
     db.commit()
 
-if __name__ == "__main__":
-    uvicorn.run(app, port=8000, host="0.0.0.0")
+handler = Mangum(app=app)
+
+"""if __name__ == "__main__":
+    uvicorn.run(app, port=8000, host="0.0.0.0")"""
 
 
 """app = FastAPI()
