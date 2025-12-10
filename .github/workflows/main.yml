@@ -61,7 +61,7 @@ jobs:
 
       - name: lint with flakes
         run: |
-          flake8 backend/
+          . venv/bin/activate && flake8 backend/
       
         # actuall runs tests
       - name: run tests
@@ -99,6 +99,18 @@ jobs:
   build: 
 
     runs-on: ubuntu-latest
+
+    services:
+      mysql: 
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: Password
+          MYSQL_DATABASE: planes
+        ports: 
+          - 3306:3306
+        
+
+
 
     steps:
       - uses: actions/checkout@v4
