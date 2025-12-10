@@ -34,14 +34,15 @@ jobs:
     # allows you to run mutiple versions of python to test it on
     strategy:
       matrix:
-        python-version: [3.7, 3.11] 
+        python-version: [3.11] 
     steps:
       - name: checkout code
-        uses: action/checkout@v4
+        uses: actions/checkout@v6
+
       - name: set up python
         uses: actions/setup-python@v4
         with: 
-          python-version: ${{matrix.python-verion}}
+          python-version: ${{ matrix.python-verion }}
       - name: install dependencies
         # flake 8 install is for linting 
         run: |
