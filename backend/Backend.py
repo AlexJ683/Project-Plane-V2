@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, status
 from pydantic import BaseModel
 from typing import Annotated
 from backend.models import models
-from database import engine, SessionLocal
+from backend.database import engine, SessionLocal
 from sqlalchemy.orm import Session
 # import uvicorn
 from mangum import Mangum
@@ -26,7 +26,7 @@ class PostBase(BaseModel):
 
 
 def get_db():
-    # create a method of db but no matter what happens 
+    # create a method of db but no matter what happens
     # it will close the db connection
     db = SessionLocal()
     try:
@@ -47,7 +47,7 @@ async def read_root():
 async def get_all_items(db: db_dep):
     db_posts = db.query(models.flights).all()
     if db_posts is None:
-        raise HTTPException(status_code=404, 
+        raise HTTPException(status_code=404,
                             detail="flight not found")
     return db_posts
 
@@ -57,7 +57,7 @@ async def read_post(flight_id: int, db: db_dep):
     db_post = db.query(models.flights).filter(
         models.flights.id == flight_id).first()
     if db_post is None:
-        raise HTTPException(status_code=404, 
+        raise HTTPException(status_code=404,
                             detail="flight not found")
     return db_post
 
@@ -67,7 +67,7 @@ async def delete_post(flight_id: int, db: db_dep):
     db_post = db.query(models.flights).filter(
         models.flights.id == flight_id).first()
     if db_post is None:
-        raise HTTPException(status_code=404, 
+        raise HTTPException(status_code=404,
                             detail="flight not found")
     db.delete(db_post)
     db.commit()
