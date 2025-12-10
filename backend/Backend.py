@@ -33,6 +33,11 @@ def get_db():
         
 db_dep = Annotated[Session, Depends(get_db)]
 
+@app.get("/", status_code=status.HTTP_200_OK)
+async def read_root():
+    return {"message": "Welcome to the Backend API"}
+
+
 @app.get("/all_items/", status_code=status.HTTP_200_OK)
 async def get_all_items(db: db_dep):
     db_posts = db.query(models.flights).all()
