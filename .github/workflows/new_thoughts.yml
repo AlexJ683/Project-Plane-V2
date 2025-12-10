@@ -45,7 +45,7 @@ jobs:
         run: docker compose up -d
 
       - name: wait for db
-        run: docker compose exec -T mysql \ sh -c 'mysql -h 127.0.0.1 -u root -pPassword -e "SELECT 1;" planes'
+        run: docker compose exec -T mysql sh -c 'mysql -h 127.0.0.1 -u root -pPassword -e "SELECT 1;" planes'
 
       - name: run tests
         run: docker compose exec -T app \pytest
