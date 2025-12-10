@@ -48,7 +48,7 @@ jobs:
         run: docker compose exec -T mysql sh -c 'mysql -h 127.0.0.1 -u root -pPassword -e "SELECT 1;" planes'
 
       - name: run tests
-        run: docker compose exec -T app \pytest
+        run: docker compose exec -T project_plane \pytest
 
       - name: configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
