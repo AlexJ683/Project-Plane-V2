@@ -42,7 +42,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Set up MYSQL
-        uses: kayqueGovetri/setup-mysql@v1
+        uses: kayqueGovetri/setup-mysql@v0.0.4
         with:
           mysql_root_password: 'Password'
           mysql_database: 'Planes'
