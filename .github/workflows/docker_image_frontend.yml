@@ -1,4 +1,20 @@
 name: docker_image_frontend
 
-on: 
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
   
+  
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: docker build . --file frontend/Dockerfile --tag project_plane_frontend:$(date +%s)
